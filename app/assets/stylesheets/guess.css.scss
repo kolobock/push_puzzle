@@ -1,0 +1,54 @@
+// Place all the styles related to the guess controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+#board {
+  table {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: -moz-none;
+    -o-user-select: none;
+    user-select: none;
+    align: center;
+    vertical-align: center;
+    border: 4px;
+    border-color: green;
+    color: midnightblue;
+    background-color: darkorange;
+    border-spacing: 4px;
+    tr {
+      align: center;
+      vertical-align: center;
+      height: 100px;
+      td {
+        background-color: green;
+        color: green;
+        align: center;
+        vertical-align: center;
+        text-align: center;
+        width: 100px;
+        font-size: 40px;
+        border-style: outset;
+        &.show {
+          color: midnightblue;
+        }
+        &.pressed {
+          border-style: inset;
+          font-style: bold;
+          background-color: 0af;
+          &.valid {
+            background-color: darkgreen;
+            color: yellow;
+          }
+          &.invalid {
+            background-color: black;
+            color: red;
+          }
+        }
+        &.sort {
+          background-color: blue;
+          color: blue;
+        }
+      }
+    }
+  }
+}
