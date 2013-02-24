@@ -30,7 +30,7 @@ class Puzzle
     noi_sum = 0
     (1..14).each do |n|
       num = digit_puzzles[n-1]
-      noi_sum += digit_puzzles[n, 15 - n].count { |p| p > num }
+      noi_sum += digit_puzzles[n, 15 - n].count { |p| p < num }
     end
     empty = @puzzles.index(0) / 4 + 1
     (noi_sum + empty).even?
