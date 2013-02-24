@@ -1,4 +1,5 @@
 PushPuzzle::Application.routes.draw do
+  get 'puzzle/new'
   root to: "puzzle#index"
 
   # The priority is based upon order of creation:
