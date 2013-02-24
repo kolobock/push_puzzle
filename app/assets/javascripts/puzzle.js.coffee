@@ -3,16 +3,14 @@
 # You can use CoffeeScript in this file: http://jashkenas.github.com/coffee-script/
 
 $ ->
-  puzzles = $('div#board table td:not(.empty)')
-
-  $(puzzles).click ->
-    cells = $('div#board table td')
-    index = $(cells).index($(this))
-    empty_index = $(cells).index($(cells).filter('.empty'))
-
-    if can_move(index, empty_index)
-      $(this).swapWith($(cells).eq(empty_index))
-      check_victory()
+  init_puzzles()
+  $('div#container button').click ->
+    $.get(
+      '/puzzle/new'
+      'json'
+      (puzzles) ->
+        fill_puzzles puzzles
+    )
 
 can_move = (from, to) ->
   possibilities = switch to
@@ -41,8 +39,28 @@ jQuery.fn.swapWith = (to) ->
   $(this).replaceWith(copy_to)
 
 check_victory = ->
-  win = [1..15].concat(0)
-  for el, ind in $('div#board table td')
+  cells = $('div#board table td')
+  return false if $(cells).index($('.empty')) isnt 15
+  win = [1..14]
+  puzzles = $(cells).filter($(':not(.empty)'))
+  for el, ind in $(puzzles)
     return(false) if win[ind] isnt +el.innerText
-  $('div#board table td:not(.empty)').unbind('click').addClass('victory')
+  $(puzzles).unbind('click').addClass('victory')
 
+init_puzzles = ->
+  puzzles = $('div#board table td:not(.empty)')
+
+  $(puzzles).click ->
+    cells = $('div#board table td')
+    index = $(cells).index($(this))
+    empty_index = $(cells).index($(cells).filter('.empty'))
+
+    if can_move(index, empty_index)
+      $(this).swapWith($(cells).eq(empty_index))
+      check_victory()
+
+fill_puzzles = (puzzles) ->
+  $('div#board table td').removeClass().each (ind, el) ->
+    $(el).text(puzzles[ind])
+    $(el).addClass('empty') if puzzles[ind] is 0
+  init_puzzles()
