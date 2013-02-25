@@ -44,14 +44,66 @@ class Puzzle
 
   end
 
+  ### source http://6brand.com/solving-8-puzzle-with-artificial-intelligence.html
   def distance_to_goal
-    @distance_to_goal ||= @puzzles.zip(SolvedPuzzles).inject(0) do |sum, (a,b)|
-      sum += manhattan_distance a % PuzzleDimension, a / PuzzleDimension,
-                                b % PuzzleDimension, b / PuzzleDimension
+    @puzzles.zip(SolvedPuzzles).inject(0) do |sum, (a,b)|
+      sum += manhattan_distance a % PuzzleDimension, a / PuzzleDimension.to_i,
+                                b % PuzzleDimension, b / PuzzleDimension.to_i
     end
   end
 
+  private
+
   def manhattan_distance(x1, y1, x2, y2)
     (x1 - x2).abs + (y1 - y2).abs
+  end
+end
+
+class State
+  def cost
+    steps_from_start + steps_to_goal
+  end
+
+  def steps_from_start
+    path.size
+  end
+
+  def steps_to_goal
+    puzzle.steps_to_goal
+  end
+end
+
+require 'set'
+def solve puzzle
+  @visited = Set.new
+  @frontier = PriorityQueue.new {|s| s.cost }
+  state = State.new puzzle
+  loop {
+    break if state.solution?
+    search state
+    state = @frontier.pop
+  }
+  state
+end
+
+class PriorityQueue
+  def initialize &comparator
+    @comparator = comparator
+    @elements = []
+  end
+
+  def << element
+    @elements << element
+    sort!
+  end
+
+  def pop
+    @elements.shift
+  end
+
+  private
+
+  def sort!
+    @elements = @elements.sort_by &@comparator
   end
 end
