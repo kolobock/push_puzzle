@@ -41,10 +41,10 @@ jQuery.fn.swapWith = (to) ->
 check_victory = ->
   cells = $('div#board table td')
   return false if $(cells).index($('.empty')) isnt 15
-  win = [1..14]
+  win = [1..15]
   puzzles = $(cells).filter($(':not(.empty)'))
   for el, ind in $(puzzles)
-    return(false) if win[ind] isnt +el.innerText
+    return(false) if win[ind] isnt +$(el).text()
   $(puzzles).unbind('click').addClass('victory')
 
 init_puzzles = ->
