@@ -30,6 +30,7 @@ can_move = (from, to) ->
     when 13 then [9, 12, 14]
     when 14 then [10, 13, 15]
     when 15 then [11, 14]
+    else []
   from in possibilities
 
 jQuery.fn.swapWith = (to) ->
