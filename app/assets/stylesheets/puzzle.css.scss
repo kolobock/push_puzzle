@@ -1,6 +1,12 @@
 // Place all the styles related to the puzzle controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+@font-face {
+  font-family: Purisa;
+  src: url('fonts/Purisa.ttf');
+}
+
 #board {
   table {
     -webkit-user-select: none;
@@ -29,7 +35,7 @@
         text-align: center;
         width: 100px;
         font-size: 48px;
-        font-family: Purisa, Comic Sans Ms, Terminal;
+        font-family: Purisa, Bradley Hand ITC, Lucidia Calligraph, Lucidia Handwriting, Fine Hand;
         border-style: outset;
         &.victory {
           background-color: darkgreen;
