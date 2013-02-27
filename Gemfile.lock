@@ -1,6 +1,10 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    PriorityQueue (0.1.2)
+    RubyInline (3.12.0)
+      ZenTest (~> 4.3)
+    ZenTest (4.8.3)
     actionmailer (3.2.11)
       actionpack (= 3.2.11)
       mail (~> 2.4.4)
@@ -107,6 +111,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  PriorityQueue
+  RubyInline
   coffee-rails (~> 3.2.1)
   jquery-rails
   pg
