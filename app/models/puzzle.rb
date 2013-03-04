@@ -14,6 +14,7 @@ class Puzzle
 
     def solved_puzzles
       @solved_puzzles ||= (1..self.puzzle_size).to_a.concat([0]).freeze
+      # @solved_puzzles ||= (0..self.puzzle_size).to_a.freeze
     end
   end
 
@@ -29,6 +30,7 @@ class Puzzle
   end
 
   def generate_puzzles
+    @zero_position = @distance_to_goal = nil
     @puzzles = self.class.solved_puzzles.shuffle
     self.generate_puzzles unless self.can_be_solved?
     puzzles
@@ -62,11 +64,12 @@ class Puzzle
   ### source http://6brand.com/solving-8-puzzle-with-artificial-intelligence.html
   def distance_to_goal
     @distance_to_goal ||= begin
-      puzzles.zip(self.class.solved_puzzles).inject(0) do |sum, (a,b)|
-        return sum unless a && b
-        sum += manhattan_distance a % self.class::PuzzleDimension, (a / self.class::PuzzleDimension).to_i,
-                                  b % self.class::PuzzleDimension, (b / self.class::PuzzleDimension).to_i
-      end
+      puzzles.zip(self.class.solved_puzzles).count { |a,b| a != b }
+      # puzzles.zip(self.class.solved_puzzles).inject(0) do |sum, (a,b)|
+      #   return sum unless a && b
+      #   sum += manhattan_distance a % self.class::PuzzleDimension, (a / self.class::PuzzleDimension).to_i,
+      #                             b % self.class::PuzzleDimension, (b / self.class::PuzzleDimension).to_i
+      # end
     end
   end
 
@@ -88,61 +91,65 @@ class Puzzle
 
 end
 
-class State
-  Directions = [:left, :right, :up, :down]
-
-  attr_reader :puzzle, :path
-
-  def initialize(puzzle, path = [])
-    @puzzle, @path = puzzle, path
-  end
-
-  def solved?
-    puzzle.solved?
-  end
-
-  def branches
-    Directions.map do |dir|
-      branch_toward dir
-    end.compact.shuffle
-  end
-
-  def cost
-    @cost ||= steps_from_start + steps_to_goal
-  end
-
-  def steps_from_start
-    @steps_from_start ||= path.size
-  end
-
-  def steps_to_goal
-    @steps_to_goal ||= puzzle.distance_to_goal
-  end
-
-  # def <=>(b)
-  #   self.cost <=> b.cost
-  # end
-
-  private
-
-  def branch_toward(direction)
-    blank_position = puzzle.zero_position
-    blankx = blank_position % puzzle.class::PuzzleDimension
-    blanky = (blank_position / puzzle.class::PuzzleDimension).to_i
-    cell = case direction
-           when :left
-             blank_position - 1 unless 0 == blankx
-           when :right
-             blank_position + 1 unless (puzzle.class::PuzzleDimension - 1) == blankx
-           when :up
-             blank_position - puzzle.class::PuzzleDimension unless 0 == blanky
-           when :down
-             blank_position + puzzle.class::PuzzleDimension unless (puzzle.class::PuzzleDimension - 1) == blanky
-           end
-    State.new puzzle.swap(cell), @path + [direction] if cell
-  end
-end
-
+# class State
+#   Directions = [:left, :right, :up, :down]
+# 
+#   attr_reader :puzzle, :path, :parent
+# 
+#   def initialize(puzzle, path = [])
+#     @puzzle, @path = puzzle, path
+#   end
+# 
+#   def solved?
+#     puzzle.solved?
+#   end
+# 
+#   def branches
+#     Directions.map do |dir|
+#       branch_toward dir
+#     end.compact.shuffle
+#   end
+# 
+#   def cost
+#     @cost ||= steps_from_start + steps_to_goal
+#   end
+# 
+#   def steps_from_start
+#     @steps_from_start ||= path.size
+#   end
+# 
+#   def steps_to_goal
+#     @steps_to_goal ||= puzzle.distance_to_goal
+#   end
+# 
+#   # def <=>(b)
+#   #   self.cost <=> b.cost
+#   # end
+# 
+#   def set_parent(p)
+#     @parent = p
+#   end
+# 
+#   private
+# 
+#   def branch_toward(direction)
+#     blank_position = puzzle.zero_position
+#     blankx = blank_position % puzzle.class::PuzzleDimension
+#     blanky = (blank_position / puzzle.class::PuzzleDimension).to_i
+#     cell = case direction
+#            when :left
+#              blank_position - 1 unless 0 == blankx
+#            when :right
+#              blank_position + 1 unless (puzzle.class::PuzzleDimension - 1) == blankx
+#            when :up
+#              blank_position - puzzle.class::PuzzleDimension unless 0 == blanky
+#            when :down
+#              blank_position + puzzle.class::PuzzleDimension unless (puzzle.class::PuzzleDimension - 1) == blanky
+#            end
+#     State.new puzzle.swap(cell), @path + [direction] if cell
+#   end
+# end
+# 
 class PuzzleSolve
   require 'set'
   require 'timeout'
@@ -156,6 +163,7 @@ class PuzzleSolve
       end.each do |branch|
         # $frontier << branch
         $frontier.push branch, branch.cost
+        branch.set_parent(state) if state.cost < branch.cost
       end
       # $frontier.sort!
     end
@@ -169,18 +177,17 @@ class PuzzleSolve
       # $frontier = Queue.new
       $frontier = PriorityQueue.new
       state = State.new puzzle
-      # Timeout::timeout(300) do
-      loop {
-        progress!
-        break if state.solved?
-        search state
-        # return if $frontier.length == 0
-        break if $frontier.empty?
-        # state = $frontier.pop
-        # state = $frontier.delete_min
-        state = $frontier.delete_min.first
-      }
-      # end
+      Timeout::timeout(120) do
+        begin
+          progress!
+          break if state.solved?
+          search state
+          # return if $frontier.length == 0
+          # state = $frontier.pop
+          # state = $frontier.delete_min
+          state = $frontier.delete_min.first
+        end until $frontier.empty?
+      end
       puts ''
       state
     end
